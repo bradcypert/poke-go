@@ -77,23 +77,12 @@ func (c *pokeClient) GetPokemon(context context.Context, key Key) (*internal.Pok
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
-	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create new request: %v", err)
-	}
-	resp, err := c.HTTPClient.Do(req)
 
+	respData, err := c.makeRequest(context, u)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to make request[%s]: %v", u.String(), err)
 	}
 
-	defer resp.Body.Close()
-
-	respData, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, err
-	}
 	pokemon := &internal.Pokemon{}
 	err = json.Unmarshal(respData, pokemon)
 	if err != nil {
@@ -116,23 +105,11 @@ func (c *pokeClient) GetAllPokemon(context context.Context, pagination PokeClien
 		internal.AddPaginationToURL(u, pagination)
 	}
 
-	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
+	respData, err := c.makeRequest(context, u)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create new request: %v", err)
-	}
-	resp, err := c.HTTPClient.Do(req)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to make GET request[%s]: %v", u.String(), err)
+		return nil, fmt.Errorf("failed to make request[%s]: %v", u.String(), err)
 	}
 
-	defer resp.Body.Close()
-
-	respData, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %v", err)
-	}
 	pokemon := internal.ResultSet{}
 	err = json.Unmarshal(respData, &pokemon)
 	if err != nil {
@@ -148,23 +125,11 @@ func (c *pokeClient) GetGeneration(context context.Context, key Key) (*internal.
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
 
-	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
+	respData, err := c.makeRequest(context, u)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create new request: %v", err)
-	}
-	resp, err := c.HTTPClient.Do(req)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to make GET request[%s]: %v", u.String(), err)
+		return nil, fmt.Errorf("failed to make request[%s]: %v", u.String(), err)
 	}
 
-	defer resp.Body.Close()
-
-	respData, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %v", err)
-	}
 	generation := &internal.Generation{}
 	err = json.Unmarshal(respData, generation)
 	if err != nil {
@@ -187,6 +152,23 @@ func (c *pokeClient) GetGenerations(context context.Context, pagination PokeClie
 		internal.AddPaginationToURL(u, pagination)
 	}
 
+	respData, err := c.makeRequest(context, u)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to make request[%s]: %v", u.String(), err)
+	}
+
+	generations := internal.ResultSet{}
+	err = json.Unmarshal(respData, &generations)
+	if err != nil {
+		return nil, err
+	}
+	return &generations, nil
+}
+
+// makeRequest makes an HTTP GET request to the given URL and returns the response body as a byte slice.
+// Uses the provided context to allow for cancellation and timeout.
+func (c *pokeClient) makeRequest(context context.Context, u *url.URL) ([]byte, error) {
 	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new request: %v", err)
@@ -199,15 +181,5 @@ func (c *pokeClient) GetGenerations(context context.Context, pagination PokeClie
 
 	defer resp.Body.Close()
 
-	respData, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, err
-	}
-	generations := internal.ResultSet{}
-	err = json.Unmarshal(respData, &generations)
-	if err != nil {
-		return nil, err
-	}
-	return &generations, nil
+	return io.ReadAll(resp.Body)
 }
