@@ -12,13 +12,7 @@ import (
 
 const PRODUCTION_POKEAPI_URL = "https://pokeapi.co/api"
 
-type PokeClientConfiguration struct {
-	BaseURL    string
-	APIVersion string
-	HTTPClient *http.Client
-}
-
-type PokeClient struct {
+type pokeClient struct {
 	BaseURL    string
 	APIVersion string
 	HTTPClient *http.Client
@@ -29,39 +23,23 @@ type PokeClientPagination struct {
 	Offset int
 }
 
-func NewClient() *PokeClient {
-	return &PokeClient{
+func NewClient() *pokeClient {
+	return &pokeClient{
 		BaseURL:    PRODUCTION_POKEAPI_URL,
 		APIVersion: "v2",
 		HTTPClient: &http.Client{},
 	}
 }
 
-func NewClientWithBaseURL(baseURL string) *PokeClient {
-	return &PokeClient{
-		BaseURL:    baseURL,
-		APIVersion: "v2",
-		HTTPClient: &http.Client{},
-	}
-}
-
-func NewClientWithBaseURLAndVersion(baseURL, apiVersion string) *PokeClient {
-	return &PokeClient{
-		BaseURL:    baseURL,
-		APIVersion: apiVersion,
-		HTTPClient: &http.Client{},
-	}
-}
-
-func (c *PokeClient) SetBaseURL(baseURL string) {
+func (c *pokeClient) SetBaseURL(baseURL string) {
 	c.BaseURL = baseURL
 }
 
-func (c *PokeClient) SetAPIVersion(apiVersion string) {
+func (c *pokeClient) SetAPIVersion(apiVersion string) {
 	c.APIVersion = apiVersion
 }
 
-func (c *PokeClient) GetPokemon(idOrName string) (*internal.Pokemon, error) {
+func (c *pokeClient) GetPokemon(idOrName string) (*internal.Pokemon, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/%s/%s/%s", c.BaseURL, c.APIVersion, "pokemon", idOrName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
@@ -87,7 +65,7 @@ func (c *PokeClient) GetPokemon(idOrName string) (*internal.Pokemon, error) {
 	return pokemon, nil
 }
 
-func (c *PokeClient) GetAllPokemon(pagination PokeClientPagination) (*internal.ResultSet, error) {
+func (c *pokeClient) GetAllPokemon(pagination PokeClientPagination) (*internal.ResultSet, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, "pokemon"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
@@ -121,7 +99,7 @@ func (c *PokeClient) GetAllPokemon(pagination PokeClientPagination) (*internal.R
 	return &pokemon, nil
 }
 
-func (c *PokeClient) GetGeneration(idOrName string) (*internal.Generation, error) {
+func (c *pokeClient) GetGeneration(idOrName string) (*internal.Generation, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/%s/%s/%s", c.BaseURL, c.APIVersion, "generation", idOrName))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
@@ -147,7 +125,7 @@ func (c *PokeClient) GetGeneration(idOrName string) (*internal.Generation, error
 	return generation, nil
 }
 
-func (c *PokeClient) GetGenerations(pagination PokeClientPagination) (*internal.ResultSet, error) {
+func (c *pokeClient) GetGenerations(pagination PokeClientPagination) (*internal.ResultSet, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, "generation"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)

@@ -29,7 +29,8 @@ func TestGetPokemon(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithBaseURL(server.URL)
+	client := NewClient()
+	client.SetBaseURL(server.URL)
 	pokemon, err := client.GetPokemon("pikachu")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -49,7 +50,8 @@ func TestGetAllPokemon(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithBaseURL(server.URL)
+	client := NewClient()
+	client.SetBaseURL(server.URL)
 	pokemons, err := client.GetAllPokemon(PokeClientPagination{
 		Limit:  2,
 		Offset: 0,
@@ -75,7 +77,8 @@ func TestGetGeneration(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithBaseURL(server.URL)
+	client := NewClient()
+	client.SetBaseURL(server.URL)
 	generation, err := client.GetGeneration("generation-i")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -95,7 +98,8 @@ func TestGetGenerations(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithBaseURL(server.URL)
+	client := NewClient()
+	client.SetBaseURL(server.URL)
 	generations, err := client.GetGenerations(PokeClientPagination{
 		Limit:  2,
 		Offset: 0,
