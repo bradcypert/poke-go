@@ -22,6 +22,8 @@ type pokeClient struct {
 
 type PokeClientPagination = internal.PokeClientPagination
 
+// NewClient creates a new PokeClient with default settings.
+// The default base URL is the production PokeAPI URL, and the default API version is "v2".
 func NewClient() *pokeClient {
 	return &pokeClient{
 		BaseURL:    PRODUCTION_POKEAPI_URL,
@@ -30,31 +32,46 @@ func NewClient() *pokeClient {
 	}
 }
 
+// SetBaseURL sets the base URL for the PokeClient.
+// This can be used to set a custom base URL for testing or other if hosting your own POKEAPI.
 func (c *pokeClient) SetBaseURL(baseURL string) {
 	c.BaseURL = baseURL
 }
 
+// SetAPIVersion sets the API version for the PokeClient.
+// This can be used to set a custom API version if needed.
+// The default API version is "v2".
 func (c *pokeClient) SetAPIVersion(apiVersion string) {
 	c.APIVersion = apiVersion
 }
 
+// Name returns a Key for a Pokemon by its name.
+// This is used to retrieve a specific Pokemon from the PokeAPI.
 func Name(name string) Key {
 	return NameKey{
 		Name: name,
 	}
 }
 
+// ID returns a Key for a Pokemon by its ID.
+// This is used to retrieve a specific Pokemon from the PokeAPI.
+// The ID is an integer that represents the Pokemon's unique identifier.
 func ID(id int) Key {
 	return IDKey{
 		ID: id,
 	}
 }
 
+// getPokeAPIUrl constructs the full URL for a given resource.
+// It combines the base URL, API version, and resource path to create the full URL.
+// The resource path is provided as a variadic argument, allowing for multiple segments.
+// It returns a parsed URL or an error if the URL could not be constructed.
 func (c *pokeClient) getPokeAPIUrl(resource ...string) (*url.URL, error) {
 	fullPath := fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, path.Join(resource...))
 	return url.Parse(fullPath)
 }
 
+// GetPokemon retrieves a Pokemon by its key (name or ID).
 func (c *pokeClient) GetPokemon(context context.Context, key Key) (*internal.Pokemon, error) {
 	u, err := c.getPokeAPIUrl("pokemon", key.getResourceKey())
 	if err != nil {
@@ -85,6 +102,10 @@ func (c *pokeClient) GetPokemon(context context.Context, key Key) (*internal.Pok
 	return pokemon, nil
 }
 
+// GetAllPokemon retrieves all Pokemon with optional pagination.
+// It returns a ResultSet containing the list of Pokemon.
+// Pagination can be used to limit the number of results and set an offset.
+// The pagination parameters are passed as a PokeClientPagination struct.
 func (c *pokeClient) GetAllPokemon(context context.Context, pagination PokeClientPagination) (*internal.ResultSet, error) {
 	u, err := c.getPokeAPIUrl("pokemon")
 	if err != nil {
@@ -120,6 +141,7 @@ func (c *pokeClient) GetAllPokemon(context context.Context, pagination PokeClien
 	return &pokemon, nil
 }
 
+// GetGeneration retrieves a Generation by its key (name or ID).
 func (c *pokeClient) GetGeneration(context context.Context, key Key) (*internal.Generation, error) {
 	u, err := c.getPokeAPIUrl("generation", key.getResourceKey())
 	if err != nil {
@@ -151,6 +173,10 @@ func (c *pokeClient) GetGeneration(context context.Context, key Key) (*internal.
 	return generation, nil
 }
 
+// GetGenerations retrieves all Generations with optional pagination.
+// It returns a ResultSet containing the list of Generations.
+// Pagination can be used to limit the number of results and set an offset.
+// The pagination parameters are passed as a PokeClientPagination struct.
 func (c *pokeClient) GetGenerations(context context.Context, pagination PokeClientPagination) (*internal.ResultSet, error) {
 	u, err := c.getPokeAPIUrl("generation")
 	if err != nil {
