@@ -12,10 +12,21 @@ import (
 
 const PRODUCTION_POKEAPI_URL = "https://pokeapi.co/api"
 
+type PokeClientConfiguration struct {
+	BaseURL    string
+	APIVersion string
+	HTTPClient *http.Client
+}
+
 type PokeClient struct {
 	BaseURL    string
 	APIVersion string
 	HTTPClient *http.Client
+}
+
+type PokeClientPagination struct {
+	Limit  int
+	Offset int
 }
 
 func NewClient() *PokeClient {
@@ -76,16 +87,16 @@ func (c *PokeClient) GetPokemon(idOrName string) (*internal.Pokemon, error) {
 	return pokemon, nil
 }
 
-func (c *PokeClient) GetAllPokemon(limit int, offset int) (*internal.ResultSet, error) {
+func (c *PokeClient) GetAllPokemon(pagination PokeClientPagination) (*internal.ResultSet, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, "pokemon"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
 
-	if limit > 0 || offset > 0 {
+	if pagination.Limit > 0 || pagination.Offset > 0 {
 		query := u.Query()
-		query.Add("limit", fmt.Sprintf("%d", limit))
-		query.Add("offset", fmt.Sprintf("%d", offset))
+		query.Add("limit", fmt.Sprintf("%d", pagination.Limit))
+		query.Add("offset", fmt.Sprintf("%d", pagination.Offset))
 		u.RawQuery = query.Encode()
 	}
 
@@ -136,16 +147,16 @@ func (c *PokeClient) GetGeneration(idOrName string) (*internal.Generation, error
 	return generation, nil
 }
 
-func (c *PokeClient) GetGenerations(limit int, offset int) (*internal.ResultSet, error) {
+func (c *PokeClient) GetGenerations(pagination PokeClientPagination) (*internal.ResultSet, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, "generation"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
 
-	if limit > 0 || offset > 0 {
+	if pagination.Limit > 0 || pagination.Offset > 0 {
 		query := u.Query()
-		query.Add("limit", fmt.Sprintf("%d", limit))
-		query.Add("offset", fmt.Sprintf("%d", offset))
+		query.Add("limit", fmt.Sprintf("%d", pagination.Limit))
+		query.Add("offset", fmt.Sprintf("%d", pagination.Offset))
 		u.RawQuery = query.Encode()
 	}
 

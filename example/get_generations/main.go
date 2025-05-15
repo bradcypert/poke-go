@@ -9,7 +9,10 @@ import (
 
 func main() {
 	client := v2.NewClient()
-	pokemon, err := client.GetAllPokemon(v2.PokeClientPagination{Limit: 1, Offset: 1})
+	pokemon, err := client.GetGenerations(v2.PokeClientPagination{
+		Limit:  1,
+		Offset: 1,
+	})
 	if err != nil {
 		panic(err)
 	}

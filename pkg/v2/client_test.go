@@ -50,7 +50,10 @@ func TestGetAllPokemon(t *testing.T) {
 	defer server.Close()
 
 	client := NewClientWithBaseURL(server.URL)
-	pokemons, err := client.GetAllPokemon(0, 0)
+	pokemons, err := client.GetAllPokemon(PokeClientPagination{
+		Limit:  2,
+		Offset: 0,
+	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -93,7 +96,10 @@ func TestGetGenerations(t *testing.T) {
 	defer server.Close()
 
 	client := NewClientWithBaseURL(server.URL)
-	generations, err := client.GetGenerations(0, 0)
+	generations, err := client.GetGenerations(PokeClientPagination{
+		Limit:  2,
+		Offset: 0,
+	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
