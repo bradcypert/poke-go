@@ -10,6 +10,7 @@ type PokeClientPagination struct {
 	Offset int
 }
 
+// AddPaginationToURL adds pagination parameters to the given URL.
 func AddPaginationToURL(u *url.URL, pagination PokeClientPagination) {
 	query := u.Query()
 	query.Add("limit", fmt.Sprintf("%d", pagination.Limit))
