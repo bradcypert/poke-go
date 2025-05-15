@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -11,7 +12,7 @@ import (
 func main() {
 	client := v2.NewClient() // Initialize the SDK client
 
-	generation, err := client.GetGeneration("1")
+	generation, err := client.GetGeneration(context.Background(), v2.ID(1))
 	if err != nil {
 		log.Fatalf("Error fetching generation: %v", err)
 	}

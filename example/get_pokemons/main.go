@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 
 func main() {
 	client := v2.NewClient()
-	pokemon, err := client.GetAllPokemon(v2.PokeClientPagination{Limit: 1, Offset: 1})
+	pokemon, err := client.GetAllPokemon(context.Background(), v2.PokeClientPagination{Limit: 1, Offset: 1})
 	if err != nil {
 		panic(err)
 	}

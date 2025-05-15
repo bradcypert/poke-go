@@ -1,11 +1,13 @@
 package v2
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"path"
 
 	internal "github.com/bradcypert/poke-go/internal/v2"
 )
@@ -18,10 +20,7 @@ type pokeClient struct {
 	HTTPClient *http.Client
 }
 
-type PokeClientPagination struct {
-	Limit  int
-	Offset int
-}
+type PokeClientPagination = internal.PokeClientPagination
 
 func NewClient() *pokeClient {
 	return &pokeClient{
@@ -39,12 +38,33 @@ func (c *pokeClient) SetAPIVersion(apiVersion string) {
 	c.APIVersion = apiVersion
 }
 
-func (c *pokeClient) GetPokemon(idOrName string) (*internal.Pokemon, error) {
-	u, err := url.Parse(fmt.Sprintf("%s/%s/%s/%s", c.BaseURL, c.APIVersion, "pokemon", idOrName))
+func Name(name string) Key {
+	return NameKey{
+		Name: name,
+	}
+}
+
+func ID(id int) Key {
+	return IDKey{
+		ID: id,
+	}
+}
+
+func (c *pokeClient) getPokeAPIUrl(resource ...string) (*url.URL, error) {
+	fullPath := fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, path.Join(resource...))
+	return url.Parse(fullPath)
+}
+
+func (c *pokeClient) GetPokemon(context context.Context, key Key) (*internal.Pokemon, error) {
+	u, err := c.getPokeAPIUrl("pokemon", key.getResourceKey())
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
-	resp, err := c.HTTPClient.Get(u.String())
+	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %v", err)
+	}
+	resp, err := c.HTTPClient.Do(req)
 
 	if err != nil {
 		return nil, err
@@ -65,20 +85,21 @@ func (c *pokeClient) GetPokemon(idOrName string) (*internal.Pokemon, error) {
 	return pokemon, nil
 }
 
-func (c *pokeClient) GetAllPokemon(pagination PokeClientPagination) (*internal.ResultSet, error) {
-	u, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, "pokemon"))
+func (c *pokeClient) GetAllPokemon(context context.Context, pagination PokeClientPagination) (*internal.ResultSet, error) {
+	u, err := c.getPokeAPIUrl("pokemon")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
 
 	if pagination.Limit > 0 || pagination.Offset > 0 {
-		query := u.Query()
-		query.Add("limit", fmt.Sprintf("%d", pagination.Limit))
-		query.Add("offset", fmt.Sprintf("%d", pagination.Offset))
-		u.RawQuery = query.Encode()
+		internal.AddPaginationToURL(u, pagination)
 	}
 
-	resp, err := c.HTTPClient.Get(u.String())
+	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %v", err)
+	}
+	resp, err := c.HTTPClient.Do(req)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to make GET request[%s]: %v", u.String(), err)
@@ -99,12 +120,17 @@ func (c *pokeClient) GetAllPokemon(pagination PokeClientPagination) (*internal.R
 	return &pokemon, nil
 }
 
-func (c *pokeClient) GetGeneration(idOrName string) (*internal.Generation, error) {
-	u, err := url.Parse(fmt.Sprintf("%s/%s/%s/%s", c.BaseURL, c.APIVersion, "generation", idOrName))
+func (c *pokeClient) GetGeneration(context context.Context, key Key) (*internal.Generation, error) {
+	u, err := c.getPokeAPIUrl("generation", key.getResourceKey())
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
-	resp, err := c.HTTPClient.Get(u.String())
+
+	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %v", err)
+	}
+	resp, err := c.HTTPClient.Do(req)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to make GET request[%s]: %v", u.String(), err)
@@ -125,20 +151,21 @@ func (c *pokeClient) GetGeneration(idOrName string) (*internal.Generation, error
 	return generation, nil
 }
 
-func (c *pokeClient) GetGenerations(pagination PokeClientPagination) (*internal.ResultSet, error) {
-	u, err := url.Parse(fmt.Sprintf("%s/%s/%s", c.BaseURL, c.APIVersion, "generation"))
+func (c *pokeClient) GetGenerations(context context.Context, pagination PokeClientPagination) (*internal.ResultSet, error) {
+	u, err := c.getPokeAPIUrl("generation")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %v", err)
 	}
 
 	if pagination.Limit > 0 || pagination.Offset > 0 {
-		query := u.Query()
-		query.Add("limit", fmt.Sprintf("%d", pagination.Limit))
-		query.Add("offset", fmt.Sprintf("%d", pagination.Offset))
-		u.RawQuery = query.Encode()
+		internal.AddPaginationToURL(u, pagination)
 	}
 
-	resp, err := c.HTTPClient.Get(u.String())
+	req, err := http.NewRequestWithContext(context, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new request: %v", err)
+	}
+	resp, err := c.HTTPClient.Do(req)
 
 	if err != nil {
 		return nil, err

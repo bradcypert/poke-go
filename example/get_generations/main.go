@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 
 func main() {
 	client := v2.NewClient()
-	pokemon, err := client.GetGenerations(v2.PokeClientPagination{
+	pokemon, err := client.GetGenerations(context.Background(), v2.PokeClientPagination{
 		Limit:  1,
 		Offset: 1,
 	})

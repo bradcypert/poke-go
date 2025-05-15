@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 
 func main() {
 	client := v2.NewClient()
-	pokemon, err := client.GetPokemon("pikachu")
+	pokemon, err := client.GetPokemon(context.Background(), v2.Name("pikachu"))
 	if err != nil {
 		fmt.Println("Error:", err)
 		return

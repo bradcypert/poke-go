@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -31,7 +32,7 @@ func TestGetPokemon(t *testing.T) {
 
 	client := NewClient()
 	client.SetBaseURL(server.URL)
-	pokemon, err := client.GetPokemon("pikachu")
+	pokemon, err := client.GetPokemon(context.Background(), Name("pikachu"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -52,7 +53,7 @@ func TestGetAllPokemon(t *testing.T) {
 
 	client := NewClient()
 	client.SetBaseURL(server.URL)
-	pokemons, err := client.GetAllPokemon(PokeClientPagination{
+	pokemons, err := client.GetAllPokemon(context.Background(), PokeClientPagination{
 		Limit:  2,
 		Offset: 0,
 	})
@@ -67,6 +68,7 @@ func TestGetAllPokemon(t *testing.T) {
 		t.Errorf("expected first pokemon to be pikachu, got %s", results[0].Name)
 	}
 }
+
 func TestGetGeneration(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/v2/generation/generation-i" {
@@ -79,7 +81,7 @@ func TestGetGeneration(t *testing.T) {
 
 	client := NewClient()
 	client.SetBaseURL(server.URL)
-	generation, err := client.GetGeneration("generation-i")
+	generation, err := client.GetGeneration(context.Background(), Name("generation-i"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -100,7 +102,7 @@ func TestGetGenerations(t *testing.T) {
 
 	client := NewClient()
 	client.SetBaseURL(server.URL)
-	generations, err := client.GetGenerations(PokeClientPagination{
+	generations, err := client.GetGenerations(context.Background(), PokeClientPagination{
 		Limit:  2,
 		Offset: 0,
 	})
